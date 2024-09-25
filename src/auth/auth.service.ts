@@ -5,7 +5,7 @@ import { db } from 'src/drizzle/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { createJwtToken } from 'src/utils/authUtils';
-import { UserTable } from 'src/drizzle/schema';
+import { AccountTable, SettingTable, UserTable } from 'src/drizzle/schema';
 
 @Injectable()
 export class AuthService {
@@ -59,13 +59,17 @@ export class AuthService {
         id: user[0].id,
       });
 
-      // await prisma.account.create({
-      //   data: {
-      //     userId: user.id,
-      //   },
-      // });
+      await db.insert(SettingTable).values({
+        userId: user[0].id,
+        currency: 'INR',
+      });
 
-      return { user : user[0], accessToken };
+      await db.insert(AccountTable).values({
+        userId: user[0].id,
+        balance: 0,
+      });
+
+      return { user: user[0], accessToken };
     } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error;
