@@ -12,6 +12,9 @@ class EnvironmentVariables {
   EXPIRATION: string;
 
   @IsString()
+  REFRESH_EXPIRATION: string;
+  
+  @IsString()
   ISSUER_BASE_URL: string;
 
   @IsString()

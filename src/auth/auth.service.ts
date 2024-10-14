@@ -4,7 +4,7 @@ import { count, eq, or } from 'drizzle-orm';
 import { db } from 'src/drizzle/db';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
-import { createJwtToken } from 'src/utils/authUtils';
+import { createJwtToken, decodeToken } from 'src/utils/authUtils';
 import { AccountTable, SettingTable, UserTable } from 'src/drizzle/schema';
 
 @Injectable()
@@ -53,11 +53,15 @@ export class AuthService {
         username: UserTable.username,
       });
 
-      const accessToken = await createJwtToken({
+      const tokenBody = {
         username: user[0].username,
         email: user[0].email,
         id: user[0].id,
-      });
+      }
+
+      const accessToken = await createJwtToken(tokenBody);
+
+      const refreshToken = await createJwtToken(tokenBody, process.env.REFRESH_EXPIRATION);
 
       await db.insert(SettingTable).values({
         userId: user[0].id,
@@ -69,7 +73,7 @@ export class AuthService {
         balance: 0,
       });
 
-      return { user: user[0], accessToken };
+      return { access : accessToken, refresh : refreshToken };
     } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error;
@@ -102,16 +106,17 @@ export class AuthService {
         throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
       }
 
-      const accessToken = await createJwtToken({
+      const tokenBody = {
         username: user.username,
         email: user.email,
         id: user.id,
-      });
+      };
 
-      delete user.password;
-      delete user.id;
+      const accessToken = await createJwtToken(tokenBody);
 
-      return { user, accessToken };
+      const refreshToken = await createJwtToken(tokenBody, process.env.REFRESH_EXPIRATION);
+
+      return { access : accessToken, refresh : refreshToken };
     } catch (error: unknown) {
       if (error instanceof HttpException) {
         throw error;
@@ -119,6 +124,37 @@ export class AuthService {
       console.error(error);
       throw new HttpException(
         'Failed to register user',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+  }
+
+  async refreshUser(token : string) {
+    try {
+      const decoded = await decodeToken(token);
+
+      if(typeof decoded !== "object") {
+        throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+      }
+
+      const tokenBody = {
+        username: decoded.username,
+        email: decoded.email,
+        id: decoded.id,
+      };
+
+      const accessToken = await createJwtToken(tokenBody);
+
+      const refreshToken = await createJwtToken(tokenBody, process.env.REFRESH_EXPIRATION);
+
+      return { access : accessToken, refresh : refreshToken };
+    } catch (error: unknown) {
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      console.error(error);
+      throw new HttpException(
+        'Failed to refresh token',
         HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
