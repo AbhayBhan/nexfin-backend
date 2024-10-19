@@ -66,12 +66,50 @@ export const UserTableRelations = relations(UserTable, ({ one }) => {
   };
 });
 
+export const SettingTableRelations = relations(SettingTable, ({ one }) => {
+  return {
+    user : one(UserTable, {
+      fields : [SettingTable.userId],
+      references : [UserTable.id],
+    })
+  }
+});
+
 export const AccountTableRelations = relations(
   AccountTable,
-  ({ many }) => {
+  ({ one, many }) => {
     return {
+      user: one(UserTable, {
+        fields: [AccountTable.userId],
+        references: [UserTable.id],
+      }),
       expenses: many(ExpensesTable),
       finances: many(FinanceTable),
     };
   },
 );
+
+export const ExpensesTableRelations = relations(
+  ExpensesTable,
+  ({ one }) => {
+    return {
+      account: one(AccountTable, {
+        fields: [ExpensesTable.accountId],
+        references: [AccountTable.id],
+      }),
+    };
+  },
+)
+
+export const FinanceTableRelations = relations(
+  FinanceTable,
+  ({ one }) => {
+    return {
+      account: one(AccountTable, {
+        fields: [FinanceTable.accountId],
+        references: [AccountTable.id],
+      }),
+    };
+  },
+)
+
