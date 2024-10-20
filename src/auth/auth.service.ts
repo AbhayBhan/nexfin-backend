@@ -64,13 +64,11 @@ export class AuthService {
       const refreshToken = await createJwtToken(tokenBody, process.env.REFRESH_EXPIRATION);
 
       await db.insert(SettingTable).values({
-        userId: user[0].id,
-        currency: 'INR',
+        userId: user[0].id
       });
 
       await db.insert(AccountTable).values({
-        userId: user[0].id,
-        balance: 0,
+        userId: user[0].id
       });
 
       return { access : accessToken, refresh : refreshToken };
@@ -95,21 +93,21 @@ export class AuthService {
         .from(UserTable)
         .where(eq(UserTable.email, email));
 
-      user = user[0];
+      let userData = user[0];
 
       if (!user) {
         throw new HttpException('User not found', HttpStatus.NOT_FOUND);
       }
 
-      const isMatch = await bcrypt.compare(password, user.password);
+      const isMatch = await bcrypt.compare(password, userData.password);
       if (!isMatch) {
         throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
       }
 
       const tokenBody = {
-        username: user.username,
-        email: user.email,
-        id: user.id,
+        username: userData.username,
+        email: userData.email,
+        id: userData.id,
       };
 
       const accessToken = await createJwtToken(tokenBody);
