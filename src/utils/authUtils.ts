@@ -9,7 +9,7 @@ const fs = FS.promises;
 type Payload = {
   username: string;
   email: string;
-  id: number;
+  id: string;
 };
 
 const createJwtToken = async (
