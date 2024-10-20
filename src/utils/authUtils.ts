@@ -1,3 +1,4 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import * as FS from 'fs';
 import * as jwt from 'jsonwebtoken';
 import * as UUID from 'uuid';
@@ -8,7 +9,7 @@ const fs = FS.promises;
 type Payload = {
   username: string;
   email: string;
-  id: number;
+  id: string;
 };
 
 const createJwtToken = async (
@@ -39,4 +40,14 @@ const createJwtToken = async (
   }
 };
 
-export { createJwtToken };
+const decodeToken = async (token : string) => {
+  try {
+    const publicKey = await fs.readFile('public_key.pem', 'utf-8');
+    const decoded = jwt.verify(token, publicKey, { algorithms: ['RS256'] });
+    return decoded;
+  } catch (error) {
+    throw new HttpException('Token Expired!', HttpStatus.UNAUTHORIZED);
+  }
+}
+
+export { createJwtToken, decodeToken };

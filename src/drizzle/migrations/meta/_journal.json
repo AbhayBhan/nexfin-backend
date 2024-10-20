@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1727158637502,
-      "tag": "0000_big_nova",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1727249288698,
-      "tag": "0001_open_lyja",
+      "when": 1729337563266,
+      "tag": "0000_steady_power_man",
       "breakpoints": true
     }
   ]
