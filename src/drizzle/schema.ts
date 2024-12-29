@@ -36,10 +36,20 @@ export const AccountTable = pgTable('account', {
   userId: uuid('userId')
     .notNull()
     .references(() => UserTable.id),
-  balance: integer('balance').notNull().default(0),
   createdAt: timestamp('createdAt').defaultNow().notNull(),
   updatedAt: timestamp('updatedAt').defaultNow().notNull(),
 });
+
+export const BankAccountTable = pgTable('bankaccounts', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  accountId: uuid('accountId')
+    .notNull()
+    .references(() => AccountTable.id),
+  bankName: varchar('bankName').notNull(),
+  balance: integer('balance').notNull().default(0),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().notNull(),
+})
 
 export const ExpensesTable = pgTable('expenses', {
   id: uuid('id').primaryKey().defaultRandom(),
@@ -47,6 +57,8 @@ export const ExpensesTable = pgTable('expenses', {
     .notNull()
     .references(() => AccountTable.id),
   expense: json('expense').notNull().$type<expense>(),
+  bankAccountId: uuid('bankAccountId')
+    .references(() => BankAccountTable.id),
 });
 
 export const FinanceTable = pgTable('finances', {
@@ -55,7 +67,20 @@ export const FinanceTable = pgTable('finances', {
     .notNull()
     .references(() => AccountTable.id),
   finance: json('finance').notNull().$type<finance>(),
+  bankAccountId: uuid('bankAccountId')
+    .notNull()
+    .references(() => BankAccountTable.id),
 });
+
+export const InvestmentsTable = pgTable('investments', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  accountId: uuid('accountId')
+    .notNull()    
+    .references(() => AccountTable.id),
+  investmentName: varchar('investmentName').notNull(),
+  amount: integer('amount').notNull().default(0),
+  linkedTo: uuid('linkedTo').references(() => BankAccountTable.id),
+})
 
 // RELATIONS
 
@@ -85,9 +110,39 @@ export const AccountTableRelations = relations(
       }),
       expenses: many(ExpensesTable),
       finances: many(FinanceTable),
+      bankaccount: many(BankAccountTable),
+      investments: many(InvestmentsTable)
     };
   },
 );
+
+export const BankTableRelations = relations(
+  BankAccountTable,
+  ({ one }) => {
+    return {
+      account: one(AccountTable, {
+        fields: [BankAccountTable.accountId],
+        references: [AccountTable.id],
+      }),
+    };
+  },
+);
+
+export const InvestmentsTableRelations = relations(
+  InvestmentsTable,
+  ({ one }) => {
+    return {
+      account: one(AccountTable, {
+        fields: [InvestmentsTable.accountId],
+        references: [AccountTable.id],
+      }),
+      bankaccounts: one(BankAccountTable, {
+        fields: [InvestmentsTable.linkedTo],
+        references: [BankAccountTable.id],
+      }),
+    };
+  },
+)
 
 export const ExpensesTableRelations = relations(
   ExpensesTable,
@@ -96,6 +151,10 @@ export const ExpensesTableRelations = relations(
       account: one(AccountTable, {
         fields: [ExpensesTable.accountId],
         references: [AccountTable.id],
+      }),
+      bankaccounts: one(BankAccountTable, {
+        fields: [ExpensesTable.bankAccountId],
+        references: [BankAccountTable.id],
       }),
     };
   },
@@ -108,6 +167,10 @@ export const FinanceTableRelations = relations(
       account: one(AccountTable, {
         fields: [FinanceTable.accountId],
         references: [AccountTable.id],
+      }),
+      bankaccounts: one(BankAccountTable, {
+        fields: [FinanceTable.bankAccountId],
+        references: [BankAccountTable.id],
       }),
     };
   },

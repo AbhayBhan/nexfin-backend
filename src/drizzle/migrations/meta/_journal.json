@@ -8,6 +8,20 @@
       "when": 1729337563266,
       "tag": "0000_steady_power_man",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1735441774864,
+      "tag": "0001_remarkable_captain_flint",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1735441923862,
+      "tag": "0002_outstanding_norrin_radd",
+      "breakpoints": true
     }
   ]
 }
