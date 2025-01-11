@@ -4,7 +4,6 @@ import { validate } from './env.validation';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { AccountModule } from './account/account.module';
 import { ExpenseModule } from './expense/expense.module';
 import { FinanceModule } from './finance/finance.module';
 
@@ -15,7 +14,6 @@ import { FinanceModule } from './finance/finance.module';
       isGlobal: true,
     }),
     AuthModule,
-    AccountModule,
     ExpenseModule,
     FinanceModule,
   ],

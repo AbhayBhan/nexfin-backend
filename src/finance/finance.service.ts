@@ -39,7 +39,7 @@ export class FinanceService {
 
   async addFinance(addFinanceDto: AddFinanceDto, id: string) {
     try {
-      const { title, amount, date, received } = addFinanceDto;
+      const { title, amount, date, received, bankId } = addFinanceDto;
 
       const userAccount = await db.query.AccountTable.findFirst({
         where: eq(AccountTable.userId, id),
@@ -51,6 +51,7 @@ export class FinanceService {
 
       await db.insert(FinanceTable).values({
         accountId: userAccount.id,
+        bankAccountId: bankId,
         finance: {
           title,
           amount,
