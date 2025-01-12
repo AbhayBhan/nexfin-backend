@@ -7,7 +7,6 @@ const uuid = UUID.v4();
 const fs = FS.promises;
 
 type Payload = {
-  username: string;
   email: string;
   id: string;
 };

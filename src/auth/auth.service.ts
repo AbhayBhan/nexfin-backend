@@ -11,20 +11,8 @@ import { AccountTable, SettingTable, UserTable } from 'src/drizzle/schema';
 export class AuthService {
   async registerUser(createUserDto: CreateUserDto) {
     try {
-      const { username, password, email, firstName, lastName, mobile } =
+      const { password, email, firstName, lastName, mobile } =
         createUserDto;
-
-      const usernameExists = await db
-        .select({ count: count() })
-        .from(UserTable)
-        .where(eq(UserTable.username, username));
-
-      if (usernameExists[0].count) {
-        throw new HttpException(
-          'Username already exists',
-          HttpStatus.BAD_REQUEST,
-        );
-      }
 
       const emailOrMobileExists = await db
         .select({ count: count() })
@@ -39,7 +27,6 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(password, salt);
 
       const reqBody = {
-        username,
         password: hashedPassword,
         email,
         firstName,
@@ -50,11 +37,9 @@ export class AuthService {
       const user = await db.insert(UserTable).values(reqBody).returning({
         id: UserTable.id,
         email: UserTable.email,
-        username: UserTable.username,
       });
 
       const tokenBody = {
-        username: user[0].username,
         email: user[0].email,
         id: user[0].id,
       }
@@ -105,7 +90,6 @@ export class AuthService {
       }
 
       const tokenBody = {
-        username: userData.username,
         email: userData.email,
         id: userData.id,
       };
